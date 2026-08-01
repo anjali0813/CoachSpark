@@ -1,0 +1,26 @@
+DOCUMENT: Quality Control Manual
+
+Inspection
+
+• Visual inspection
+• Dimensional inspection
+• Functional testing
+
+If defects are found
+
+1. Stop production.
+2. Label defective item.
+3. Inform quality engineer.
+4. Record defect.
+
+5S Principles
+
+Sort
+
+Set in Order
+
+Shine
+
+Standardize
+
+Sustain

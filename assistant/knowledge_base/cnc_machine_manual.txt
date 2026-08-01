@@ -1,0 +1,28 @@
+DOCUMENT: CNC Machine Operating Manual
+
+STARTUP
+
+1. Check coolant level.
+2. Inspect cutting tools.
+3. Verify emergency stop button.
+4. Switch ON main power.
+5. Load machining program.
+
+OVERHEATING
+
+Symptoms
+
+• High spindle temperature
+• Coolant warning
+• Burning smell
+
+Actions
+
+1. Stop machine.
+2. Allow cooling.
+3. Check coolant.
+4. Inform maintenance.
+
+SAFETY
+
+Never open the machine guard while spindle is rotating.

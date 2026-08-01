@@ -1,0 +1,34 @@
+DOCUMENT: Fire Safety Manual
+
+Fire Classes
+
+Class A
+Wood
+Paper
+
+Class B
+Oil
+Fuel
+
+Class C
+Electrical Equipment
+
+Fire Extinguisher Procedure
+
+PASS Method
+
+P - Pull Pin
+
+A - Aim at Base
+
+S - Squeeze Lever
+
+S - Sweep Side to Side
+
+Evacuation
+
+Do not use elevators.
+
+Report to assembly point.
+
+Wait for attendance confirmation.

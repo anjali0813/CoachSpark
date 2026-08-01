@@ -1,0 +1,49 @@
+{
+    "E001": {
+        "name": "Rahul",
+        "role": "Machine Technician",
+        "department": "Maintenance",
+        "experience": "5 years",
+        "completed_training": [
+            "Factory Induction",
+            "PPE Guidelines",
+            "Hydraulic Systems",
+            "Preventive Maintenance"
+        ]
+    },
+
+    "E002": {
+        "name": "Priya",
+        "role": "New Employee",
+        "department": "Assembly",
+        "experience": "1 month",
+        "completed_training": [
+            "Factory Induction",
+            "PPE Guidelines"
+        ]
+    },
+
+    "E003": {
+        "name": "Arjun",
+        "role": "Quality Inspector",
+        "department": "Quality",
+        "experience": "2 years",
+        "completed_training": [
+            "Quality Control",
+            "5S",
+            "Inspection Standards"
+        ]
+    },
+
+    "E004": {
+        "name": "Sneha",
+        "role": "Forklift Operator",
+        "department": "Logistics",
+        "experience": "3 years",
+        "completed_training": [
+            "Forklift Operations",
+            "Warehouse Safety",
+            "Emergency Response"
+        ]
+    }
+}

@@ -1,0 +1,25 @@
+DOCUMENT: Conveyor Belt Manual
+
+BELT JAM
+
+Signs
+
+• Belt not moving
+• Overload alarm
+• Product accumulation
+
+Procedure
+
+1. Press Emergency Stop.
+2. Disconnect power.
+3. Remove blockage.
+4. Inspect rollers.
+5. Restart after supervisor approval.
+
+Maintenance
+
+Daily inspection
+
+Weekly lubrication
+
+Monthly alignment check

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coach Spark</title>
+<link rel="stylesheet" href="/static/assistant/style.css">
+</head>
+<body>
+<div class="app">
+<header class="header">
+<h1>🤖 Coach Spark</h1>
+<p>AI Learning & Development Assistant</p>
+</header>
+
+<section id="employee-card" class="card">
+<h2>Select Employee</h2>
+<select id="employee-select">
+<option value="E001">Rahul Kumar - Machine Technician</option>
+<option value="E002">Priya Sharma - New Employee</option>
+<option value="E003">Arjun Nair - Quality Inspector</option>
+<option value="E004">Sneha Das - Forklift Operator</option>
+</select>
+<button id="start-btn">Start Session</button>
+</section>
+
+<section id="chat-section" class="hidden">
+<div id="chat-box" class="chat-box">
+<div class="bot-message">
+<strong>Coach Spark</strong>
+<p>Hello! I'm your AI learning assistant. How can I help you today?</p>
+</div>
+</div>
+
+<div class="input-area">
+<input id="message-input" type="text" placeholder="Ask about safety, maintenance, quality, SOPs...">
+<button id="send-btn">Send</button>
+</div>
+</section>
+</div>
+
+<script src="/static/assistant/script.js"></script>
+</body>
+</html>

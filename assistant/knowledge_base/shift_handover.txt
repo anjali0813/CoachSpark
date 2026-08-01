@@ -1,0 +1,19 @@
+DOCUMENT: Shift Handover Procedure
+
+Outgoing Operator
+
+• Complete production log.
+
+• Report machine condition.
+
+• Inform pending maintenance.
+
+Incoming Operator
+
+• Review logbook.
+
+• Inspect machine.
+
+• Verify safety checks.
+
+Never begin production without handover.

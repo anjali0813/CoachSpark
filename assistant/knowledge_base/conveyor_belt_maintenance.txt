@@ -1,0 +1,28 @@
+DOCUMENT: Conveyor Belt Preventive Maintenance
+
+Section 1: Daily Inspection
+
+- Inspect the conveyor belt for wear, cuts, or damage.
+- Check belt alignment.
+- Ensure the emergency stop button is functioning.
+- Remove dust and debris from the belt and rollers.
+
+Section 2: Weekly Maintenance
+
+- Inspect roller bearings.
+- Check belt tension.
+- Tighten loose bolts and fasteners.
+- Lubricate moving parts according to the maintenance schedule.
+
+Section 3: Safety Precautions
+
+- Stop the conveyor before maintenance.
+- Disconnect electrical power.
+- Apply Lockout/Tagout procedures.
+- Never clean or adjust a moving conveyor belt.
+- Wear appropriate PPE during maintenance.
+
+Section 4: Reporting
+
+- Report excessive wear, unusual noise, belt slippage, or damaged rollers to the maintenance supervisor.
+- Record all maintenance activities in the maintenance log.

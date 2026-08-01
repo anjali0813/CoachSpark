@@ -1,0 +1,25 @@
+{
+    "New Employee": [
+        "Factory Induction",
+        "PPE Guidelines",
+        "Emergency Response",
+        "Fire Safety",
+        "5S Fundamentals"
+    ],
+
+    "Machine Technician": [
+        "Hydraulic Systems",
+        "PLC Basics",
+        "Preventive Maintenance",
+        "Electrical Safety",
+        "Machine Maintenance"
+    ],
+
+    "Quality Inspector": [
+        "Quality Control",
+        "Inspection Standards",
+        "Root Cause Analysis",
+        "Lean Manufacturing",
+        "Six Sigma Basics"
+    ]
+}

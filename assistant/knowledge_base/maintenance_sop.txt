@@ -1,0 +1,29 @@
+DOCUMENT: Preventive Maintenance SOP
+
+DAILY
+
+• Clean equipment
+• Check lubrication
+• Remove dust
+
+WEEKLY
+
+• Inspect belts
+• Tighten bolts
+• Test sensors
+
+MONTHLY
+
+• Replace worn parts
+• Verify calibration
+• Update maintenance log
+
+LOCKOUT TAGOUT
+
+Before maintenance:
+
+1. Disconnect power.
+2. Lock power source.
+3. Attach warning tag.
+4. Verify zero energy.
+5. Begin work.

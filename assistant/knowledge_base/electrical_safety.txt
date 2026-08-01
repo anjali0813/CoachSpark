@@ -1,0 +1,20 @@
+DOCUMENT: Electrical Safety Guidelines
+
+CATEGORY: Safety
+
+Always inspect electrical cables before use.
+
+Never touch exposed wires.
+
+Use insulated gloves when working on electrical systems.
+
+Turn OFF the main power before maintenance.
+
+Only authorized electricians may repair electrical equipment.
+
+If someone receives an electric shock:
+
+1. Disconnect power immediately.
+2. Do not touch the victim until power is isolated.
+3. Call emergency response.
+4. Begin CPR if trained.

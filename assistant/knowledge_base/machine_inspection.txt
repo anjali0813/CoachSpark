@@ -1,0 +1,25 @@
+DOCUMENT: Daily Machine Inspection
+
+Before starting production
+
+Inspect
+
+Power supply
+
+Emergency stop
+
+Safety guards
+
+Lubrication
+
+Coolant
+
+Abnormal noise
+
+Leaks
+
+If defects are found
+
+Do not operate machine.
+
+Inform maintenance immediately.

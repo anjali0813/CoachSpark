@@ -1,0 +1,21 @@
+DOCUMENT: Frequently Asked Questions
+
+Q: How do I report an accident?
+
+A:
+Stop work, inform supervisor, contact safety officer, and complete an incident report.
+
+Q: What PPE is required near molten metal?
+
+A:
+Helmet, face shield, heat resistant gloves, protective apron, and safety shoes.
+
+Q: What should I do if the conveyor belt jams?
+
+A:
+Press Emergency Stop, disconnect power, remove obstruction, inspect rollers, and restart only after approval.
+
+Q: How do I become a maintenance technician?
+
+A:
+Complete Preventive Maintenance, PLC Basics, Hydraulic Systems, and Lockout Tagout training.

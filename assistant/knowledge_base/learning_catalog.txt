@@ -1,0 +1,31 @@
+DOCUMENT: L&D Training Catalogue
+
+New Employee
+
+• Workplace Safety
+• PPE Awareness
+• Company Orientation
+
+Machine Operator
+
+• CNC Programming
+• Conveyor Maintenance
+• Hydraulic Systems
+
+Maintenance Technician
+
+• PLC Basics
+• Preventive Maintenance
+• Lockout Tagout
+
+Supervisor
+
+• Leadership
+• Incident Investigation
+• Root Cause Analysis
+
+Quality Engineer
+
+• Six Sigma Basics
+• Quality Inspection
+• Process Improvement

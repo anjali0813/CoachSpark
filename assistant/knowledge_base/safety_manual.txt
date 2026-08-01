@@ -1,0 +1,30 @@
+DOCUMENT: Shopfloor Safety Manual
+VERSION: 1.0
+
+GENERAL SAFETY RULES
+
+Every employee must:
+
+• Wear Personal Protective Equipment (PPE).
+• Follow supervisor instructions.
+• Keep workstations clean.
+• Report unsafe conditions immediately.
+• Never bypass machine safety guards.
+
+ACCIDENT REPORTING
+
+If an accident occurs:
+
+1. Stop work immediately.
+2. Inform your supervisor.
+3. Call emergency response team.
+4. Record incident in the Incident Register.
+5. Do not restart equipment until authorized.
+
+EMERGENCY CONTACT
+
+Safety Officer
+Emergency Extension: 222
+
+Supervisor
+Emergency Extension: 101

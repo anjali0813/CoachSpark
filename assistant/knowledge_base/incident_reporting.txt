@@ -1,0 +1,25 @@
+DOCUMENT: Incident Reporting
+
+Every incident must be reported.
+
+Near misses must also be reported.
+
+Report includes
+
+Date
+
+Time
+
+Location
+
+Description
+
+Witness
+
+Supervisor
+
+Purpose
+
+Prevent future accidents.
+
+Improve workplace safety.

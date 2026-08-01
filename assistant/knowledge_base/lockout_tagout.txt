@@ -1,0 +1,17 @@
+DOCUMENT: Lockout Tagout Procedure
+
+Purpose
+
+Prevent accidental machine startup during maintenance.
+
+Procedure
+
+1. Shut down equipment.
+2. Disconnect power.
+3. Lock isolation switch.
+4. Attach warning tag.
+5. Verify zero energy.
+6. Perform maintenance.
+7. Remove lock only after inspection.
+
+Only authorized employees may perform Lockout/Tagout.
