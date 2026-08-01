@@ -21,5 +21,19 @@
         "Root Cause Analysis",
         "Lean Manufacturing",
         "Six Sigma Basics"
+    ],
+
+    "Forklift Operator": [
+        "Forklift Operations",
+        "Warehouse Safety",
+        "Material Handling",
+        "Emergency Response",
+        "Fire Safety"
+    ],
+
+    "default": [
+        "Factory Induction",
+        "PPE Guidelines",
+        "General Workplace Safety"
     ]
 }
