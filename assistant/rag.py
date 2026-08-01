@@ -39,7 +39,10 @@ SECTION_KEYWORDS = {
 # In-memory index
 # --------------------------------------------------------------------
 
-_chunks = []  # list of {"filename": str, "text": str, "section": str}
+_chunks = []          # list of {"filename": str, "text": str, "section": str}
+_doc_frequency = {}    # word -> number of chunks that contain it
+_total_chunks = 0      # size of the index, used to scale word weights
+MAX_WORD_WEIGHT = 15   # cap so a single ultra-rare word can't dominate
 
 
 def _clean_text(text: str) -> str:
@@ -96,7 +99,7 @@ def _chunk_manual(manual: dict) -> list:
 
 def build_index() -> None:
     """Read every manual and rebuild the in-memory paragraph index."""
-    global _chunks
+    global _chunks, _doc_frequency, _total_chunks
     manuals = _load_manuals()
 
     seen_filenames = set()
@@ -110,16 +113,45 @@ def build_index() -> None:
     for manual in unique_manuals:
         _chunks.extend(_chunk_manual(manual))
 
+    # Count, for every word, how many chunks it shows up in. This lets us
+    # tell a distinctive topic word (e.g. "ppe") from filler that appears
+    # everywhere (e.g. "area"), so filler can't outscore the real match.
+    _doc_frequency = {}
+    for chunk in _chunks:
+        for word in set(_tokenize(chunk["text"])):
+            _doc_frequency[word] = _doc_frequency.get(word, 0) + 1
+
+    _total_chunks = len(_chunks)
+
     print(f"Loaded {len(unique_manuals)} manuals | Indexed {len(_chunks)} paragraphs")
+
+
+def _word_weight(word: str) -> int:
+    """
+    Rare words score higher, common/filler words score lower.
+    A word that appears in only 1 of 40 chunks is far more meaningful
+    than one that appears in 30 of them.
+    """
+    doc_freq = _doc_frequency.get(word, 0)
+    if doc_freq == 0 or _total_chunks == 0:
+        return 1
+    weight = max(1, _total_chunks // doc_freq)
+    return min(weight, MAX_WORD_WEIGHT)
 
 
 def _score_chunk(question_words: list, chunk: dict) -> int:
     """
-    Weighted keyword scoring:
-      +5  a question word appears in the filename
-      +3  each distinct question word found in the paragraph
-      +1  each extra repeat of a matched word
-      +2  a question word matches the detected section name
+    Rarity-weighted keyword scoring. Each matched word contributes
+    according to how distinctive it is across the whole knowledge base
+    (see _word_weight), not a flat bonus. This stops filler words that
+    appear in almost every manual (e.g. "area", "safety") from dragging
+    in unrelated documents, while a rare, on-topic word (e.g. "ppe",
+    "molten") correctly dominates the score.
+
+      word_weight x 3   the word appears in the filename
+      word_weight x 2   the word matches the detected section name
+      word_weight x N   the word appears N times in the paragraph
+                          (capped at 3 occurrences to avoid keyword stuffing)
     """
     score = 0
     filename_lower = chunk["filename"].lower()
@@ -128,15 +160,16 @@ def _score_chunk(question_words: list, chunk: dict) -> int:
     word_counts = Counter(paragraph_words)
 
     for word in set(question_words):
+        weight = _word_weight(word)
+
         if word in filename_lower:
-            score += 5
+            score += weight * 3
         if word in section_lower:
-            score += 2
-        occurrences = word_counts.get(word, 0)
-        if occurrences == 1:
-            score += 3
-        elif occurrences > 1:
-            score += 3 + (occurrences - 1)
+            score += weight * 2
+
+        occurrences = min(word_counts.get(word, 0), 3)
+        if occurrences:
+            score += weight * occurrences
 
     return score
 
@@ -167,17 +200,23 @@ def retrieve_context(question: str) -> dict:
         return empty_result
 
     scored.sort(key=lambda c: c["score"], reverse=True)
+    top_score = scored[0]["score"]
+
+    # A chunk only makes the cut if it's reasonably competitive with the
+    # best match. This stops the results from being padded out with
+    # weak, unrelated filler once the truly relevant paragraphs run out.
+    relevance_floor = max(3, int(top_score * 0.4))
 
     selected, seen_text = [], set()
     for chunk in scored:
+        if chunk["score"] < relevance_floor:
+            break
         if chunk["text"] in seen_text:
             continue
         seen_text.add(chunk["text"])
         selected.append(chunk)
         if len(selected) == TOP_K:
             break
-
-    top_score = selected[0]["score"]
     context = "\n\n".join(chunk["text"] for chunk in selected)
 
     sources = []
