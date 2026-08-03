@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const chatForm        = document.getElementById("chat-form");
   const messageInput     = document.getElementById("message-input");
   const sendBtn          = document.getElementById("send-btn");
+  const quizQuickBtn     = document.getElementById("quiz-quick-btn");
 
   let employeeId = "";
 
@@ -143,6 +144,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     appendMessage("user", "You", question);
     messageInput.value = "";
+
+    if (/\bquiz\b/i.test(question)) {
+      await startQuiz(question);
+      messageInput.focus();
+      return;
+    }
+
     setBusy(true);
 
     try {
@@ -171,7 +179,140 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // ==========================================
+  // Interactive Quiz
+  // ==========================================
+
+  async function startQuiz(topic) {
+    setBusy(true);
+
+    try {
+      const response = await fetch("/quiz/start/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic }),
+      });
+
+      const data = await response.json();
+      setBusy(false);
+
+      if (!response.ok || data.error) {
+        appendMessage("bot", "Coach Spark", data.error || "Couldn't start the quiz. Please try again.");
+        return;
+      }
+
+      appendMessage(
+        "bot",
+        "Coach Spark",
+        `🎯 Let's test your knowledge on ${data.section}! ${data.total} questions — good luck.`
+      );
+      renderQuizQuestion(data.question);
+
+    } catch (error) {
+      console.error(error);
+      setBusy(false);
+      appendMessage("bot", "Coach Spark", "Unable to connect to the server. Please try again.");
+    }
+  }
+
+  function renderQuizQuestion(question) {
+    const card = document.createElement("div");
+    card.className = "message bot quiz-card";
+
+    const optionsHtml = Object.entries(question.options).map(([letter, text]) => `
+      <button class="quiz-option" data-letter="${letter}" type="button">
+        <span class="quiz-option-letter">${letter}</span>
+        <span class="quiz-option-text">${escapeHtml(text)}</span>
+      </button>
+    `).join("");
+
+    card.innerHTML = `
+      <span class="message-label">🎯 Question ${question.number} of ${question.total}</span>
+      <p class="quiz-question-text">${escapeHtml(question.question)}</p>
+      <div class="quiz-options">${optionsHtml}</div>
+    `;
+
+    chatBox.appendChild(card);
+    scrollToBottom();
+
+    const buttons = card.querySelectorAll(".quiz-option");
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => submitQuizAnswer(btn.dataset.letter, card, buttons), { once: true });
+    });
+  }
+
+  async function submitQuizAnswer(selectedLetter, card, buttons) {
+    buttons.forEach((btn) => { btn.disabled = true; });
+    card.querySelector(`[data-letter="${selectedLetter}"]`)?.classList.add("selected");
+
+    try {
+      const response = await fetch("/quiz/answer/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ selected: selectedLetter }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || data.error) {
+        appendMessage("bot", "Coach Spark", data.error || "Something went wrong with the quiz.");
+        return;
+      }
+
+      buttons.forEach((btn) => {
+        if (btn.dataset.letter === data.correct_answer) {
+          btn.classList.add("correct");
+        } else if (btn.dataset.letter === selectedLetter && !data.correct) {
+          btn.classList.add("incorrect");
+        }
+      });
+
+      const feedback = document.createElement("div");
+      feedback.className = `quiz-feedback ${data.correct ? "correct" : "incorrect"}`;
+      feedback.innerHTML = `
+        <span class="quiz-feedback-label">${data.correct ? "✅ Correct!" : "❌ Not quite."}</span>
+        ${data.explanation ? `<p class="quiz-explanation">💡 ${escapeHtml(data.explanation)}</p>` : ""}
+        <span class="quiz-score">Score: ${data.score}/${data.total}</span>
+      `;
+      card.appendChild(feedback);
+      scrollToBottom();
+
+      if (data.finished) {
+        setTimeout(() => renderQuizSummary(data.score, data.total), 700);
+      } else {
+        setTimeout(() => renderQuizQuestion(data.next_question), 900);
+      }
+
+    } catch (error) {
+      console.error(error);
+      appendMessage("bot", "Coach Spark", "Unable to connect to the server. Please try again.");
+    }
+  }
+
+  function renderQuizSummary(score, total) {
+    const pct = score / total;
+    let emoji = "📖";
+    let note = "Keep practicing — review the manual and try again!";
+
+    if (pct === 1) {
+      emoji = "🏆";
+      note = "Perfect score! You know this material cold.";
+    } else if (pct >= 0.7) {
+      emoji = "🎉";
+      note = "Nice work — solid understanding!";
+    } else if (pct >= 0.4) {
+      emoji = "👍";
+      note = "Good effort — a bit more review will help.";
+    }
+
+    appendMessage("bot", "Coach Spark", `${emoji} Quiz complete! Final score: ${score}/${total}\n${note}`);
+  }
+
   startBtn?.addEventListener("click", startSession);
   endBtn?.addEventListener("click", endSession);
   chatForm?.addEventListener("submit", sendMessage);
+  quizQuickBtn?.addEventListener("click", () => {
+    messageInput.value = "Quiz me on ";
+    messageInput.focus();
+  });
 });

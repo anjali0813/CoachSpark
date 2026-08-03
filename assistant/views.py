@@ -18,6 +18,7 @@ from groq import Groq
 from .rag import retrieve_context
 from .personalize import get_user_profile
 from .recommender import get_recommendations
+from .quiz import generate_quiz
 
 load_dotenv()
 
@@ -42,6 +43,13 @@ If the manual context does not fully answer the question, say so clearly
 instead of guessing."""
 
 NOT_FOUND_MESSAGE = "I couldn't find relevant information in the training manuals."
+
+QUIZ_SESSION_KEY = "coach_spark_quiz"
+QUIZ_NOT_FOUND_MESSAGE = (
+    "I don't have enough manual content on that topic to build a quiz. "
+    "Try a topic like safety, PPE, maintenance, or quality."
+)
+QUIZ_GENERATION_FAILED_MESSAGE = "I couldn't generate a quiz right now. Please try again."
 
 
 def index(request):
@@ -113,6 +121,124 @@ Question
             "section": section,
             "recommendations": recommendations,
         })
+
+    except Exception as error:
+        traceback.print_exc()
+        return JsonResponse({"error": str(error)}, status=500)
+
+
+# =====================================================
+# INTERACTIVE QUIZ
+# =====================================================
+# Questions and correct answers live server-side in the Django
+# session. Only the question text and options are ever sent to the
+# browser -- the answer key never leaves the server.
+
+def _public_question(question: dict, number: int, total: int) -> dict:
+    """Strip the correct answer / explanation before sending to the client."""
+    return {
+        "number": number,
+        "total": total,
+        "question": question["question"],
+        "options": question["options"],
+    }
+
+
+@csrf_exempt
+def quiz_start(request):
+    """Generate a quiz for a topic and store it in the session."""
+    if request.method != "POST":
+        return JsonResponse({"error": "Only POST requests are allowed."}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        topic = data.get("topic", "").strip()
+
+        if not topic:
+            return JsonResponse({"error": "Please tell me a topic to quiz you on."}, status=400)
+
+        rag_result = retrieve_context(topic)
+
+        if rag_result["score"] == 0:
+            return JsonResponse({"error": QUIZ_NOT_FOUND_MESSAGE}, status=404)
+
+        questions = generate_quiz(client, MODEL_NAME, rag_result["context"])
+
+        if not questions:
+            return JsonResponse({"error": QUIZ_GENERATION_FAILED_MESSAGE}, status=500)
+
+        request.session[QUIZ_SESSION_KEY] = {
+            "questions": questions,
+            "current": 0,
+            "score": 0,
+        }
+        request.session.modified = True
+
+        return JsonResponse({
+            "started": True,
+            "section": rag_result["section"],
+            "sources": rag_result["sources"],
+            "total": len(questions),
+            "question": _public_question(questions[0], 1, len(questions)),
+        })
+
+    except Exception as error:
+        traceback.print_exc()
+        return JsonResponse({"error": str(error)}, status=500)
+
+
+@csrf_exempt
+def quiz_answer(request):
+    """Grade the selected option, update the score, and return the next question."""
+    if request.method != "POST":
+        return JsonResponse({"error": "Only POST requests are allowed."}, status=405)
+
+    try:
+        quiz_state = request.session.get(QUIZ_SESSION_KEY)
+
+        if not quiz_state:
+            return JsonResponse({"error": "No active quiz. Please start a new one."}, status=400)
+
+        data = json.loads(request.body)
+        selected = data.get("selected", "").strip().upper()
+
+        questions = quiz_state["questions"]
+        current_index = quiz_state["current"]
+
+        if current_index >= len(questions):
+            return JsonResponse({"error": "This quiz has already finished."}, status=400)
+
+        current_question = questions[current_index]
+        correct_letter = current_question["correct"]
+        is_correct = selected == correct_letter
+
+        if is_correct:
+            quiz_state["score"] += 1
+
+        quiz_state["current"] += 1
+        total = len(questions)
+
+        response_data = {
+            "correct": is_correct,
+            "correct_answer": correct_letter,
+            "explanation": current_question.get("explanation", ""),
+            "score": quiz_state["score"],
+            "total": total,
+        }
+
+        if quiz_state["current"] < total:
+            response_data["finished"] = False
+            response_data["next_question"] = _public_question(
+                questions[quiz_state["current"]], quiz_state["current"] + 1, total
+            )
+            request.session[QUIZ_SESSION_KEY] = quiz_state
+        else:
+            response_data["finished"] = True
+            del request.session[QUIZ_SESSION_KEY]
+
+        request.session.modified = True
+
+        return JsonResponse(response_data)
 
     except Exception as error:
         traceback.print_exc()

@@ -243,4 +243,4 @@ def retrieve_context(question: str) -> dict:
 
 
 # Build the index once, when the module is first imported.
-build_index()
+build_index()   
