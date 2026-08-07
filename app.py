@@ -205,8 +205,18 @@ if "cs_messages" not in st.session_state:
 if "cs_quiz" not in st.session_state:
     st.session_state.cs_quiz = None  # {"questions", "current", "score", "stage"}
 
-if "cs_employee" not in st.session_state or st.session_state.cs_employee != employee_id:
+if "cs_employee" not in st.session_state:
+    # First run this session -- nothing to reset yet.
     st.session_state.cs_employee = employee_id
+elif st.session_state.cs_employee != employee_id:
+    # A different employee was picked mid-session. Start a clean
+    # conversation for them rather than carrying over the previous
+    # employee's chat history and any in-progress quiz.
+    st.session_state.cs_messages = []
+    st.session_state.cs_quiz = None
+    st.session_state.cs_employee = employee_id
+    new_name = EMPLOYEES[employee_id]["name"]
+    st.toast(f"Switched to {new_name} — starting a new session.", icon="🔄")
 
 # --------------------------------------------------
 # Render Chat History
