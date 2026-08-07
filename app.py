@@ -150,12 +150,19 @@ st.markdown("""
     from{ opacity:0; transform:translateY(6px); }
     to{ opacity:1; transform:translateY(0); }
 }
-/* The employee picker is a plain "choose from a list" control, so hide
-   the blinking text caret and I-beam cursor that Streamlit's selectbox
-   shows by default (it's built on a searchable text input under the hood). */
-div[data-baseweb="select"] input{
+/* The employee picker is a plain "choose from a list" control. Streamlit's
+   selectbox is built on a searchable text input under the hood, and that
+   input can still show a focus caret even with caret-color hidden. Instead,
+   stop the input from ever being clickable/focusable -- clicks fall through
+   to the dropdown control underneath, which still opens the list normally,
+   but the input itself can never show a cursor. Two selector patterns are
+   included since the exact DOM attributes vary slightly across Streamlit
+   versions. */
+div[data-baseweb="select"] input,
+[data-testid="stSelectbox"] input{
     caret-color: transparent !important;
     cursor: default !important;
+    pointer-events: none !important;
 }
 </style>
 """, unsafe_allow_html=True)
