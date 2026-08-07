@@ -28,8 +28,10 @@ STOP_WORDS = {
 
 SECTION_KEYWORDS = {
     "Safety": ["safety", "ppe", "fire", "chemical", "electrical", "lockout", "emergency", "incident", "hazard"],
-    "Machine Operation": ["cnc", "spindle", "coolant", "conveyor", "operate", "operation", "machine operation"],
-    "Maintenance": ["maintenance", "preventive maintenance", "repair", "lubrication", "hydraulic", "overhaul", "servicing"],
+    "Machine Operation": ["cnc", "spindle", "coolant", "operate", "operation", "machine operation",
+                           "troubleshoot", "troubleshooting"],
+    "Maintenance": ["maintenance", "conveyor", "preventive maintenance", "repair", "lubrication",
+                     "hydraulic", "overhaul", "servicing", "inspect", "alignment"],
     "Quality": ["quality", "inspection", "inspector", "defect"],
     "Warehouse": ["forklift", "warehouse", "logistics", "material handling"],
     "Learning": ["learning", "training", "catalog", "induction", "digital"],
@@ -60,11 +62,30 @@ def _tokenize(text: str) -> list:
 
 
 def _detect_section(filename: str, text: str) -> str:
-    haystack = f"{filename} {text}".lower()
+    """
+    Score every category instead of returning on the first keyword hit.
+    A filename match is a strong, deliberate signal (e.g. "maintenance"
+    in "conveyor_belt_maintenance.txt") so it's weighted heavily. A
+    single incidental mention in the body (e.g. one line about an
+    emergency stop button inside an otherwise maintenance-focused
+    checklist) only nudges the score, so it can't hijack the category.
+    """
+    filename_lower = filename.lower()
+    text_lower = text.lower()
+
+    scores = {}
     for section, keywords in SECTION_KEYWORDS.items():
-        if any(keyword in haystack for keyword in keywords):
-            return section
-    return "General"
+        score = 0
+        for keyword in keywords:
+            if keyword in filename_lower:
+                score += 6
+            score += text_lower.count(keyword) * 2
+        scores[section] = score
+
+    best_section = max(scores, key=scores.get)
+    if scores[best_section] == 0:
+        return "General"
+    return best_section
 
 
 def _load_manuals() -> list:

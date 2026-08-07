@@ -19,6 +19,7 @@ from .rag import retrieve_context
 from .personalize import get_user_profile
 from .recommender import get_recommendations
 from .quiz import generate_quiz
+from .escalation import apply_escalation_guard
 
 load_dotenv()
 
@@ -35,12 +36,19 @@ SYSTEM_PROMPT = """You are Coach Spark, an AI Learning & Development Assistant
 for manufacturing employees.
 
 Answer ONLY using the retrieved manual context provided below.
-Never invent company policies or procedures.
-Use clear, worker-friendly language, personalized to the employee's role.
-Keep the answer under 150 words and use bullet points where useful.
+Never invent procedures, safety steps, or company policy -- including
+general safety knowledge that sounds reasonable (e.g. lockout/tagout,
+PPE requirements) if it does not literally appear in the context below.
 
-If the manual context does not fully answer the question, say so clearly
-instead of guessing."""
+If the context only partially answers the question, state clearly and
+plainly what the manual does NOT cover, then tell the employee to
+contact their supervisor or the maintenance team for that specific gap.
+Do not suggest "referring to a different document" or guess at what
+that document might say -- just say the manual doesn't cover it and
+point to a supervisor.
+
+Use clear, worker-friendly language, personalized to the employee's role.
+Keep the answer under 150 words and use bullet points where useful."""
 
 NOT_FOUND_MESSAGE = "I couldn't find relevant information in the training manuals."
 
@@ -114,6 +122,7 @@ Question
         )
 
         answer = completion.choices[0].message.content
+        answer = apply_escalation_guard(answer)
 
         return JsonResponse({
             "response": answer,
