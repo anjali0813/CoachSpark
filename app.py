@@ -150,6 +150,13 @@ st.markdown("""
     from{ opacity:0; transform:translateY(6px); }
     to{ opacity:1; transform:translateY(0); }
 }
+/* The employee picker is a plain "choose from a list" control, so hide
+   the blinking text caret and I-beam cursor that Streamlit's selectbox
+   shows by default (it's built on a searchable text input under the hood). */
+div[data-baseweb="select"] input{
+    caret-color: transparent !important;
+    cursor: default !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
