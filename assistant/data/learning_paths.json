@@ -31,6 +31,13 @@
         "Fire Safety"
     ],
 
+    "Machine Operation": [
+        "CNC Fundamentals",
+        "PLC Basics",
+        "Machine Maintenance",
+        "Electrical Safety"
+    ],
+
     "default": [
         "Factory Induction",
         "PPE Guidelines",

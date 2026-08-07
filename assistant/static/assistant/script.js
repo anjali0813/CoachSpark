@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const SECTION_EMOJI = {
     Safety: "🦺",
+    "Machine Operation": "⚙️",
     Maintenance: "🛠️",
     Quality: "🔍",
     Warehouse: "📦",

@@ -28,7 +28,8 @@ STOP_WORDS = {
 
 SECTION_KEYWORDS = {
     "Safety": ["safety", "ppe", "fire", "chemical", "electrical", "lockout", "emergency", "incident", "hazard"],
-    "Maintenance": ["maintenance", "machine", "conveyor", "cnc", "tool", "repair", "hydraulic"],
+    "Machine Operation": ["cnc", "spindle", "coolant", "conveyor", "operate", "operation", "machine operation"],
+    "Maintenance": ["maintenance", "preventive maintenance", "repair", "lubrication", "hydraulic", "overhaul", "servicing"],
     "Quality": ["quality", "inspection", "inspector", "defect"],
     "Warehouse": ["forklift", "warehouse", "logistics", "material handling"],
     "Learning": ["learning", "training", "catalog", "induction", "digital"],
@@ -243,4 +244,4 @@ def retrieve_context(question: str) -> dict:
 
 
 # Build the index once, when the module is first imported.
-build_index()   
+build_index()

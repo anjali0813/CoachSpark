@@ -72,6 +72,7 @@ EMPLOYEES = {
 
 SECTION_EMOJI = {
     "Safety": "🦺",
+    "Machine Operation": "⚙️",
     "Maintenance": "🛠️",
     "Quality": "🔍",
     "Warehouse": "📦",
