@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -45,6 +45,97 @@
         <span class="chat-status">Session active</span>
       </div>
       <button id="end-btn" class="btn-secondary">End Session</button>
+    </div>
+
+    <div id="chat-box" class="chat-box">
+      <div class="message bot">
+        <span class="message-label">Coach Spark</span>
+        <p>Hello! Ask me about safety, PPE, maintenance, machine operation, quality, or training. I'll answer using our manuals only.</p>
+      </div>
+    </div>
+
+    <form id="chat-form" class="input-area">
+      <input id="message-input" type="text" autocomplete="off"
+             placeholder="Ask about safety, maintenance, quality, SOPs...">
+      <button id="send-btn" class="btn-primary" type="submit">Send</button>
+    </form>
+
+    <div class="quick-actions">
+      <button id="quiz-quick-btn" class="btn-quiz-quick" type="button">
+        🎯 Practice Quiz
+      </button>
+    </div>
+
+  </section>
+
+</main>
+
+<script src="/static/assistant/script.js"></script>
+</body>
+</html> -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coach Spark | Learning &amp; Development Assistant</title>
+<link rel="stylesheet" href="/static/assistant/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-mark">CS</span>
+      <div class="brand-text">
+        <span class="brand-name">Coach Spark</span>
+        <span class="brand-tag">Learning &amp; Development Assistant</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="app">
+
+  <section id="employee-card" class="card employee-card">
+    <h2>Start a session</h2>
+    <p class="card-subtext">Select your profile to personalize answers and training recommendations.</p>
+
+    <label class="field-label" for="employee-select">Employee</label>
+    <select id="employee-select">
+      <option value="E001">Rahul Kumar &mdash; Machine Technician</option>
+      <option value="E002">Priya Sharma &mdash; New Employee</option>
+      <option value="E003">Arjun Nair &mdash; Quality Inspector</option>
+      <option value="E004">Sneha Das &mdash; Forklift Operator</option>
+    </select>
+
+    <button id="start-btn" class="btn-primary">Start Session</button>
+  </section>
+
+  <section id="chat-section" class="chat-section hidden">
+
+    <div class="chat-header">
+      <div>
+        <span class="chat-employee" id="chat-employee-name">&nbsp;</span>
+        <span class="chat-status">Session active</span>
+      </div>
+      <div class="chat-header-actions">
+        <button id="progress-btn" class="btn-secondary" type="button">📊 My Progress</button>
+        <button id="end-btn" class="btn-secondary" type="button">End Session</button>
+      </div>
     </div>
 
     <div id="chat-box" class="chat-box">
