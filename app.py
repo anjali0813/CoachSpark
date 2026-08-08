@@ -57,6 +57,26 @@ Do not suggest "referring to a different document" or guess at what
 that document might say -- just say the manual doesn't cover it and
 point to a supervisor.
 
+PERSONALIZE the answer to the employee profile below. This must change
+HOW you present the same manual content, never WHAT facts you include --
+you may never add a fact, step, or warning that isn't in the manual
+context, but you must adjust:
+
+- New employees (experience under 6 months) or anyone whose completed
+  training does not include this topic: use more explicit, step-by-step
+  phrasing, briefly explain WHY each safety step matters, and do not
+  assume they know shop-floor terms or abbreviations.
+- Experienced employees whose completed training already covers this
+  topic: be more concise, skip explaining basics they've already been
+  trained on, and lead with anything that's easy to overlook rather
+  than re-teaching fundamentals.
+- Always keep every safety-critical step from the manual regardless of
+  experience level -- conciseness must never drop a safety instruction.
+- If the employee's role is different from who the manual content is
+  clearly written for (e.g. a Quality Inspector asking a Maintenance
+  question), briefly note that this falls outside their usual role and
+  they should coordinate with the responsible team.
+
 Use clear, worker-friendly language.
 Keep the answer under 150 words and use bullet points where useful."""
 
@@ -350,7 +370,14 @@ if question:
                 profile = get_user_profile(employee_id)
                 recommendations = get_recommendations(profile, rag_result["section"])
 
-                user_prompt = f"""Employee Role: {profile.get('role', 'Unknown')}
+                completed = ", ".join(profile.get("completed_training", [])) or "None recorded"
+
+                user_prompt = f"""Employee Profile
+Name: {profile.get('name', 'Unknown')}
+Role: {profile.get('role', 'Unknown')}
+Department: {profile.get('department', 'Unknown')}
+Experience: {profile.get('experience', 'Unknown')}
+Completed Training: {completed}
 
 Training Manual Context
 {rag_result["context"]}
