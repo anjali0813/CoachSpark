@@ -127,6 +127,28 @@ html, body{
 [data-testid="stMarkdownContainer"] p{
     color: var(--cs-text) !important;
 }
+/* Native Streamlit buttons (quiz options, New Session) are separate
+   elements from the chat text above and were still rendering as solid
+   dark bars with invisible text on mobile. Pin their colors explicitly
+   too, in both default and hover states. */
+.stButton button,
+[data-testid="stButton"] button{
+    background-color: #ffffff !important;
+    color: var(--cs-text) !important;
+    border: 1px solid #dce3ea !important;
+}
+.stButton button:hover,
+[data-testid="stButton"] button:hover{
+    background-color: #f5f9fd !important;
+    border-color: var(--cs-accent) !important;
+    color: var(--cs-text) !important;
+}
+.stButton button p,
+.stButton button div,
+[data-testid="stButton"] button p,
+[data-testid="stButton"] button div{
+    color: var(--cs-text) !important;
+}
 .cs-hero{
     background:linear-gradient(120deg, #14487e 0%, #2e7bc3 100%);
     padding:22px 26px;
