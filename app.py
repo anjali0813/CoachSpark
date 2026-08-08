@@ -17,7 +17,7 @@ from groq import Groq
 from assistant.rag import retrieve_context
 from assistant.personalize import get_user_profile
 from assistant.recommender import get_recommendations
-from assistant.quiz import generate_quiz
+from assistant.quiz import generate_question
 from assistant.escalation import apply_escalation_guard
 
 # --------------------------------------------------
@@ -90,6 +90,16 @@ QUIZ_NOT_FOUND_MESSAGE = (
     "Try safety, PPE, maintenance, or quality."
 )
 QUIZ_GENERATION_FAILED_MESSAGE = "😕 I couldn't generate a quiz right now. Please try again."
+
+QUIZ_TARGET_QUESTIONS = 5
+DIFFICULTY_ORDER = ["easy", "medium", "hard"]
+
+
+def _next_quiz_difficulty(current_difficulty: str, was_correct: bool) -> str:
+    """Step difficulty up after a correct answer, down after a wrong one."""
+    idx = DIFFICULTY_ORDER.index(current_difficulty) if current_difficulty in DIFFICULTY_ORDER else 1
+    idx = min(idx + 1, len(DIFFICULTY_ORDER) - 1) if was_correct else max(idx - 1, 0)
+    return DIFFICULTY_ORDER[idx]
 
 EMPLOYEES = {
     "E001": {"name": "Rahul Kumar", "role": "Machine Technician", "emoji": "🛠️"},
@@ -323,10 +333,12 @@ if question:
                 "section": None, "sources": [], "recommendations": [],
             })
         else:
-            with st.spinner("📝 Writing quiz questions..."):
-                quiz_questions = generate_quiz(client, MODEL_NAME, rag_result["context"])
+            with st.spinner("📝 Writing your first question..."):
+                first_question = generate_question(
+                    client, MODEL_NAME, rag_result["context"], difficulty="medium"
+                )
 
-            if not quiz_questions:
+            if not first_question:
                 st.session_state.cs_messages.append({
                     "role": "assistant",
                     "content": QUIZ_GENERATION_FAILED_MESSAGE,
@@ -336,16 +348,25 @@ if question:
                 st.session_state.cs_messages.append({
                     "role": "assistant",
                     "content": (f"🎯 Let's test your knowledge on **{rag_result['section']}**! "
-                                f"{len(quiz_questions)} questions — good luck."),
+                                f"Questions adapt to how you're doing — good luck."),
                     "section": rag_result["section"],
                     "sources": rag_result["sources"],
                     "recommendations": [],
                 })
                 st.session_state.cs_quiz = {
-                    "questions": quiz_questions,
-                    "current": 0,
+                    "employee_id": employee_id,
+                    "context": rag_result["context"],
+                    "section": rag_result["section"],
+                    "difficulty": "medium",
+                    "used_questions": [first_question["question"]],
+                    "current_question": first_question,
+                    "index": 0,
+                    "target_total": QUIZ_TARGET_QUESTIONS,
                     "score": 0,
                     "stage": "answering",
+                    "selected": None,
+                    "correct": None,
+                    "wrong_focus_areas": [],
                 }
         st.rerun()
 
@@ -440,16 +461,18 @@ Question
 quiz = st.session_state.cs_quiz
 
 if quiz:
-    total = len(quiz["questions"])
-    idx = quiz["current"]
+    total = quiz["target_total"]
+    idx = quiz["index"]
+    current_question = quiz["current_question"]
 
     st.markdown("---")
 
     if quiz["stage"] == "finished":
         score = quiz["score"]
-        pct = score / total
+        answered = idx + (1 if quiz.get("correct") is not None else 0)
+        pct = score / answered if answered else 0
 
-        st.markdown(f"### 🏁 Quiz Complete — {score}/{total}")
+        st.markdown(f"### 🏁 Quiz Complete — {score}/{answered}")
 
         if pct == 1:
             st.success("🏆 Perfect score! You know this material cold.")
@@ -460,14 +483,22 @@ if quiz:
         else:
             st.warning("📖 Keep practicing — review the manual and try again!")
 
+        if quiz["wrong_focus_areas"]:
+            st.markdown("**📌 Areas to revisit:**")
+            for area in dict.fromkeys(quiz["wrong_focus_areas"]):  # dedupe, preserve order
+                st.write(f"- {area}")
+
         if st.button("✅ Done", use_container_width=True):
             st.session_state.cs_quiz = None
             st.rerun()
 
     else:
-        current_question = quiz["questions"][idx]
-
-        st.markdown(f"### 🎯 Question {idx + 1} of {total}")
+        difficulty_emoji = {"easy": "🟢", "medium": "🟡", "hard": "🔴"}.get(quiz["difficulty"], "🟡")
+        st.markdown(
+            f'### 🎯 Question {idx + 1} of {total} '
+            f'<span class="cs-chip">{difficulty_emoji} {quiz["difficulty"].title()}</span>',
+            unsafe_allow_html=True,
+        )
         st.progress(idx / total)
         st.write(current_question["question"])
 
@@ -478,6 +509,10 @@ if quiz:
                     quiz["correct"] = (letter == current_question["correct"])
                     if quiz["correct"]:
                         quiz["score"] += 1
+                    else:
+                        quiz["wrong_focus_areas"].append(
+                            current_question.get("focus_area") or quiz["section"]
+                        )
                     quiz["stage"] = "feedback"
                     st.session_state.cs_quiz = quiz
                     st.rerun()
@@ -494,11 +529,44 @@ if quiz:
             if current_question.get("explanation"):
                 st.caption(f"💡 {current_question['explanation']}")
 
-            st.markdown(f"**Score so far: {quiz['score']}/{total}**")
+            # Recommended improvement -- tied to the employee's actual
+            # learning path (recommender.py), not a generic "review the
+            # manual" message. This is what turns feedback into a next step.
+            profile = get_user_profile(quiz["employee_id"])
+            recommendations = get_recommendations(profile, quiz["section"])
+            focus_label = current_question.get("focus_area") or quiz["section"]
+
+            if quiz["correct"] and recommendations:
+                st.info(f"✅ Solid grasp of **{focus_label}**. Keep building on it "
+                        f"with **{recommendations[0]}**.")
+            elif not quiz["correct"] and recommendations:
+                st.warning(f"📌 Recommended focus: review **{recommendations[0]}** "
+                           f"to strengthen **{focus_label}**.")
+
+            st.markdown(f"**Score so far: {quiz['score']}/{idx + 1}**")
 
             next_label = "Next Question ➡️" if idx + 1 < total else "See Results 🏁"
             if st.button(next_label, use_container_width=True):
-                quiz["current"] += 1
-                quiz["stage"] = "finished" if quiz["current"] >= total else "answering"
-                st.session_state.cs_quiz = quiz
+                if idx + 1 >= total:
+                    quiz["stage"] = "finished"
+                    st.session_state.cs_quiz = quiz
+                else:
+                    next_difficulty = _next_quiz_difficulty(quiz["difficulty"], quiz["correct"])
+                    with st.spinner("📝 Writing your next question..."):
+                        next_question = generate_question(
+                            client, MODEL_NAME, quiz["context"],
+                            difficulty=next_difficulty,
+                            exclude_questions=quiz["used_questions"],
+                        )
+                    if not next_question:
+                        quiz["stage"] = "finished"
+                    else:
+                        quiz["used_questions"].append(next_question["question"])
+                        quiz["current_question"] = next_question
+                        quiz["difficulty"] = next_difficulty
+                        quiz["index"] += 1
+                        quiz["stage"] = "answering"
+                        quiz["selected"] = None
+                        quiz["correct"] = None
+                    st.session_state.cs_quiz = quiz
                 st.rerun()
