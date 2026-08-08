@@ -97,13 +97,35 @@ st.set_page_config(page_title="Coach Spark", page_icon="🤖", layout="centered"
 
 st.markdown("""
 <style>
+/* Tell the browser this page is designed for light mode. Without this,
+   Chrome for Android's "force dark" feature will auto-invert colors on
+   pages it thinks have no explicit color scheme -- which is exactly
+   what was washing out / hiding text on mobile while it looked fine
+   on desktop. This single declaration stops the browser from touching
+   our colors at all. */
 :root{
+    color-scheme: light only;
     --cs-primary:#14487e;
     --cs-accent:#2e7bc3;
     --cs-bg:#eef2f6;
+    --cs-text:#1e2733;
+}
+html, body{
+    color-scheme: light only;
 }
 .stApp{
     background:linear-gradient(180deg, #e9f1fb 0%, #eef2f6 45%);
+    color: var(--cs-text) !important;
+}
+/* Explicitly pin chat message text color -- st.write() output inherits
+   theme text color, which is the exact element that was disappearing
+   on mobile. Pinning it here means it no longer depends on Streamlit's
+   theme resolution or the device's dark-mode setting. */
+[data-testid="stChatMessageContent"],
+[data-testid="stChatMessageContent"] p,
+[data-testid="stMarkdownContainer"],
+[data-testid="stMarkdownContainer"] p{
+    color: var(--cs-text) !important;
 }
 .cs-hero{
     background:linear-gradient(120deg, #14487e 0%, #2e7bc3 100%);
