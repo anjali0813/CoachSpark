@@ -1,31 +1,25 @@
 DOCUMENT: L&D Training Catalogue
 
+Recommended Next Training by Role
+
+This catalogue lists the recommended next training for each employee role. Use it to answer questions about what training an employee should complete next.
+
 New Employee
 
-• Workplace Safety
-• PPE Awareness
-• Company Orientation
+Recommended next training: Factory Induction, PPE Guidelines, Emergency Response, Fire Safety, 5S Fundamentals.
 
-Machine Operator
+Machine Technician
 
-• CNC Programming
-• Conveyor Maintenance
-• Hydraulic Systems
+Recommended next training: Hydraulic Systems, PLC Basics, Preventive Maintenance, Electrical Safety, Machine Maintenance.
 
-Maintenance Technician
+Quality Inspector
 
-• PLC Basics
-• Preventive Maintenance
-• Lockout Tagout
+Recommended next training: Quality Control, Inspection Standards, Root Cause Analysis, Lean Manufacturing, Six Sigma Basics.
+
+Forklift Operator
+
+Recommended next training: Forklift Operations, Warehouse Safety, Material Handling, Emergency Response, Fire Safety.
 
 Supervisor
 
-• Leadership
-• Incident Investigation
-• Root Cause Analysis
-
-Quality Engineer
-
-• Six Sigma Basics
-• Quality Inspection
-• Process Improvement
+Recommended next training: Leadership, Incident Investigation, Root Cause Analysis.
