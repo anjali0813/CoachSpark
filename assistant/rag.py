@@ -312,8 +312,17 @@ def retrieve_context(question: str, profile_hint: str = "") -> dict:
 
     scored = []
     for chunk in _chunks:
-        score = _score_chunk(question_words, chunk)
-        if hint_words:
+        base_score = _score_chunk(question_words, chunk)
+        score = base_score
+        # The role hint may only nudge chunks the question itself
+        # already matched (base_score > 0) -- it must never be the
+        # reason a chunk enters the results in the first place. Without
+        # this guard, an unrelated question that happens to share a
+        # word with the employee's own role (e.g. "quality" appearing
+        # in some unrelated document, matching a "Quality Inspector"
+        # role hint) could get pulled in as a false match, bypassing
+        # the out-of-scope gate entirely.
+        if hint_words and base_score > 0:
             chunk_words = set(_tokenize(chunk["text"]))
             hint_matches = len(hint_words & chunk_words)
             if hint_matches:
