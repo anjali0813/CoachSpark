@@ -146,26 +146,31 @@ def _chunk_manual(manual: dict) -> list:
     """
     Split a manual into paragraph chunks on blank lines.
 
-    Short lines under 40 characters (e.g. "BELT JAM", "Procedure",
+    Short lines under 40 characters (e.g. "BELT JAM", "STARTUP",
     "Fire Classes") are usually section headings, not real content --
     but dropping them outright silently deletes their keywords from
-    the index. Instead they're accumulated and carried forward:
+    the index. Instead they're accumulated into a pending run and
+    resolved once we know what follows:
 
-    - If a long paragraph follows, the accumulated heading text is
+    - If a long paragraph follows, the entire accumulated run is
       prefixed onto it, so the heading's keywords survive into that
-      chunk (e.g. "BELT JAM" attaches to the procedure that follows).
-    - If enough short lines accumulate to form a meaningful chunk on
-      their own (>= 40 characters), they're flushed as their own
-      chunk rather than waiting indefinitely for a long paragraph that
-      may never come -- some documents (e.g. a fire-class listing made
-      entirely of brief lines) would otherwise produce zero indexed
-      chunks and become completely invisible to search.
-    - Anything still pending at the end of the document is flushed too,
-      even if short, since a short indexed chunk beats a dropped one.
+      chunk (e.g. "STARTUP" attaches to the steps that follow it).
+    - If the document ends while a run is still pending (e.g. a short
+      document made entirely of brief lines, like a fire-class list),
+      the whole run is flushed as its own chunk rather than dropped.
+
+    Earlier versions of this function flushed a pending run as soon as
+    its accumulated length crossed 40 characters, without checking
+    whether a long paragraph was coming next. That caused a short
+    heading to split away from its own content whenever several short
+    lines in a row (e.g. a title line plus a heading) happened to
+    cross 40 characters together before reaching the real paragraph --
+    orphaning the keyword from the content it was meant to introduce.
+    Waiting until we see what actually follows avoids that.
     """
     seen_paragraphs = set()
     chunks = []
-    pending_heading = ""
+    pending_heading = []
 
     def _flush(text: str) -> None:
         text = text.strip()
@@ -184,20 +189,17 @@ def _chunk_manual(manual: dict) -> list:
             continue
 
         if len(paragraph) < 40:
-            pending_heading = f"{pending_heading} {paragraph}".strip()
-            if len(pending_heading) >= 40:
-                _flush(pending_heading)
-                pending_heading = ""
+            pending_heading.append(paragraph)
             continue
 
         if pending_heading:
-            paragraph = f"{pending_heading}: {paragraph}"
-            pending_heading = ""
+            paragraph = " ".join(pending_heading) + ": " + paragraph
+            pending_heading = []
 
         _flush(paragraph)
 
     if pending_heading:
-        _flush(pending_heading)
+        _flush(" ".join(pending_heading))
 
     return chunks
 
