@@ -143,11 +143,37 @@ def _load_manuals() -> list:
 
 
 def _chunk_manual(manual: dict) -> list:
+    """
+    Split a manual into paragraph chunks on blank lines.
+
+    Short lines under 40 characters (e.g. "BELT JAM", "Procedure",
+    "Signs") are usually section headings, not real content -- but
+    dropping them outright silently deletes their keywords from the
+    index. A question like "conveyor belt jammed" would then never
+    match the very procedure that heading introduces, because the word
+    "jam" existed only in the discarded heading, not in the procedure
+    text itself. Instead, short lines are carried forward and prefixed
+    onto the next substantial paragraph, so the heading's keywords
+    survive into a real, indexed chunk.
+    """
     seen_paragraphs = set()
     chunks = []
+    pending_heading = ""
+
     for paragraph in manual["content"].split("\n\n"):
         paragraph = paragraph.strip()
-        if len(paragraph) < 40 or paragraph in seen_paragraphs:
+        if not paragraph:
+            continue
+
+        if len(paragraph) < 40:
+            pending_heading = f"{pending_heading} {paragraph}".strip()
+            continue
+
+        if pending_heading:
+            paragraph = f"{pending_heading}: {paragraph}"
+            pending_heading = ""
+
+        if paragraph in seen_paragraphs:
             continue
         seen_paragraphs.add(paragraph)
         chunks.append({
