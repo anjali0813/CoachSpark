@@ -147,18 +147,36 @@ def _chunk_manual(manual: dict) -> list:
     Split a manual into paragraph chunks on blank lines.
 
     Short lines under 40 characters (e.g. "BELT JAM", "Procedure",
-    "Signs") are usually section headings, not real content -- but
-    dropping them outright silently deletes their keywords from the
-    index. A question like "conveyor belt jammed" would then never
-    match the very procedure that heading introduces, because the word
-    "jam" existed only in the discarded heading, not in the procedure
-    text itself. Instead, short lines are carried forward and prefixed
-    onto the next substantial paragraph, so the heading's keywords
-    survive into a real, indexed chunk.
+    "Fire Classes") are usually section headings, not real content --
+    but dropping them outright silently deletes their keywords from
+    the index. Instead they're accumulated and carried forward:
+
+    - If a long paragraph follows, the accumulated heading text is
+      prefixed onto it, so the heading's keywords survive into that
+      chunk (e.g. "BELT JAM" attaches to the procedure that follows).
+    - If enough short lines accumulate to form a meaningful chunk on
+      their own (>= 40 characters), they're flushed as their own
+      chunk rather than waiting indefinitely for a long paragraph that
+      may never come -- some documents (e.g. a fire-class listing made
+      entirely of brief lines) would otherwise produce zero indexed
+      chunks and become completely invisible to search.
+    - Anything still pending at the end of the document is flushed too,
+      even if short, since a short indexed chunk beats a dropped one.
     """
     seen_paragraphs = set()
     chunks = []
     pending_heading = ""
+
+    def _flush(text: str) -> None:
+        text = text.strip()
+        if not text or text in seen_paragraphs:
+            return
+        seen_paragraphs.add(text)
+        chunks.append({
+            "filename": manual["filename"],
+            "text": text,
+            "section": _detect_section(manual["filename"], text),
+        })
 
     for paragraph in manual["content"].split("\n\n"):
         paragraph = paragraph.strip()
@@ -167,20 +185,20 @@ def _chunk_manual(manual: dict) -> list:
 
         if len(paragraph) < 40:
             pending_heading = f"{pending_heading} {paragraph}".strip()
+            if len(pending_heading) >= 40:
+                _flush(pending_heading)
+                pending_heading = ""
             continue
 
         if pending_heading:
             paragraph = f"{pending_heading}: {paragraph}"
             pending_heading = ""
 
-        if paragraph in seen_paragraphs:
-            continue
-        seen_paragraphs.add(paragraph)
-        chunks.append({
-            "filename": manual["filename"],
-            "text": paragraph,
-            "section": _detect_section(manual["filename"], paragraph),
-        })
+        _flush(paragraph)
+
+    if pending_heading:
+        _flush(pending_heading)
+
     return chunks
 
 
