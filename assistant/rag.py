@@ -281,9 +281,20 @@ def _score_chunk(question_words: list, chunk: dict) -> int:
     return score
 
 
-def retrieve_context(question: str) -> dict:
+def retrieve_context(question: str, profile_hint: str = "") -> dict:
     """
     Search the indexed manuals for the best matching paragraphs.
+
+    `profile_hint` is optional context about the asking employee (e.g.
+    their role, such as "Quality Inspector"). Without it, a generic
+    question like "what are my recommended trainings?" carries no
+    information to tell apart several equally-relevant chunks (e.g. one
+    section per role in a training catalogue) -- they all score
+    identically, and TOP_K then keeps only whichever happened to come
+    first in the document, regardless of who's actually asking. When a
+    chunk's own text contains words from the hint, it gets a modest
+    boost so the chunk that's actually relevant to *this* employee wins
+    the tie instead of losing to document order.
 
     Returns:
         {"context": str, "sources": [str], "score": int, "section": str}
@@ -297,9 +308,16 @@ def retrieve_context(question: str) -> dict:
     if not question_words:
         return empty_result
 
+    hint_words = set(_tokenize(profile_hint)) if profile_hint else set()
+
     scored = []
     for chunk in _chunks:
         score = _score_chunk(question_words, chunk)
+        if hint_words:
+            chunk_words = set(_tokenize(chunk["text"]))
+            hint_matches = len(hint_words & chunk_words)
+            if hint_matches:
+                score += hint_matches * 4
         if score > 0:
             scored.append({**chunk, "score": score})
 

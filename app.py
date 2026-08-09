@@ -324,7 +324,8 @@ if question:
 
     if re.search(r"\bquiz\b", question, re.IGNORECASE):
         with st.spinner("🔎 Finding relevant manual content..."):
-            rag_result = retrieve_context(question)
+            _quiz_profile = get_user_profile(employee_id)
+            rag_result = retrieve_context(question, profile_hint=_quiz_profile.get("role", ""))
 
         if rag_result["score"] == 0:
             st.session_state.cs_messages.append({
@@ -376,7 +377,8 @@ if question:
 
         with st.chat_message("assistant", avatar="🤖"):
             with st.spinner("🔎 Searching training manuals..."):
-                rag_result = retrieve_context(question)
+                profile = get_user_profile(employee_id)
+                rag_result = retrieve_context(question, profile_hint=profile.get("role", ""))
 
             if rag_result["score"] == 0:
                 st.write(NOT_FOUND_MESSAGE)
@@ -388,7 +390,6 @@ if question:
                     "recommendations": [],
                 })
             else:
-                profile = get_user_profile(employee_id)
                 recommendations = get_recommendations(profile, rag_result["section"])
 
                 completed = ", ".join(profile.get("completed_training", [])) or "None recorded"
