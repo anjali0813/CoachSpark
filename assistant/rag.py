@@ -55,9 +55,48 @@ def _clean_text(text: str) -> str:
     return text.strip()
 
 
+def _stem(word: str) -> str:
+    """
+    Lightweight suffix stripping so close word forms score as the same
+    word -- e.g. "jam" and "jammed", "inspect" and "inspecting" --
+    instead of being treated as unrelated. Deliberately simple, rule-
+    based heuristics only (no external NLP libraries), consistent with
+    this module's zero-dependency design.
+
+    Without this, a question like "conveyor belt jammed" could fail to
+    match a document section headed "BELT JAM", even when that section
+    is exactly the right answer -- the words are related but not
+    identical, and the original scoring only matched identical tokens.
+    """
+    if len(word) > 6 and word.endswith("ies"):
+        return word[:-3] + "y"
+
+    stem = word
+    suffix_stripped = False
+    if len(word) > 5 and word.endswith("ing"):
+        stem, suffix_stripped = word[:-3], True
+    elif len(word) > 4 and word.endswith("ed"):
+        stem, suffix_stripped = word[:-2], True
+    elif len(word) > 4 and word.endswith("es"):
+        stem, suffix_stripped = word[:-2], True
+    elif len(word) > 4 and word.endswith("s") and not word.endswith("ss"):
+        stem, suffix_stripped = word[:-1], True
+
+    # Collapse a doubled trailing consonant left over from stripping
+    # -ed/-ing off a short verb, e.g. "jammed" -> "jamm" -> "jam",
+    # "stopped" -> "stopp" -> "stop", "running" -> "runn" -> "run".
+    # Only applies when we actually stripped a suffix above -- otherwise
+    # ordinary words that end in a double consonant (e.g. "less",
+    # "process") would get incorrectly truncated too.
+    if suffix_stripped and len(stem) > 2 and stem[-1] == stem[-2] and stem[-1] not in "aeiou":
+        stem = stem[:-1]
+
+    return stem
+
+
 def _tokenize(text: str) -> list:
     text = text.lower().translate(str.maketrans("", "", string.punctuation))
-    words = [w for w in text.split() if w and w not in STOP_WORDS]
+    words = [_stem(w) for w in text.split() if w and w not in STOP_WORDS]
     return words
 
 
