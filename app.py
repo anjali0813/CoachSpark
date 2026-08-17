@@ -40,7 +40,7 @@ if not api_key:
 
 client = Groq(api_key=api_key)
 
-MODEL_NAME = "llama-3.3-70b-versatile"
+MODEL_NAME = "openai/gpt-oss-120b"
 
 SYSTEM_PROMPT = """You are Coach Spark, an AI Learning & Development Assistant
 for manufacturing employees.
