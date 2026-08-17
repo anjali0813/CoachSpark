@@ -40,7 +40,7 @@ if not api_key:
 
 client = Groq(api_key=api_key)
 
-MODEL_NAME = "openai/gpt-oss-120b"
+MODEL_NAME = "llama-3.3-70b-versatile"
 
 SYSTEM_PROMPT = """You are Coach Spark, an AI Learning & Development Assistant
 for manufacturing employees.
@@ -81,6 +81,13 @@ context, but you must adjust:
   employee's Completed Training. List only courses they have not yet
   completed. This is a strict rule, not a stylistic preference -- check
   the Completed Training list explicitly before naming any course.
+- ALWAYS open the response by addressing the employee by their first
+  name in a sentence (e.g. "Rahul, ..." or "Hi Priya, ..."). This is a
+  strict rule, not a formatting choice you may skip -- do not open with
+  a title-only header, a bare "Note:", or any other impersonal opener
+  that never actually names the employee. The name may appear inside a
+  bold header if you use one, but a header alone is not sufficient if
+  the body of the response never addresses them by name either.
 
 Use clear, worker-friendly language.
 Keep the answer under 150 words and use bullet points where useful."""
